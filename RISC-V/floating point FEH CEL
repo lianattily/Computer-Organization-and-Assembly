@@ -1,0 +1,14 @@
+const5	DF	5.0
+const9	DF	9.0
+const32	DF	32.0
+fp	DF	33
+
+flw	f10, fp(x3)
+
+flw	f0, const5(x3)	//f0
+flw	f1, const9(x3)
+fdiv.s	f0, f0, f1
+flw	f1, const32(x3)
+fsub.s	f10, f10, f1 	 //f10 = fahr – 32.0
+fmul.s	f10, f0, f10
+ebreak x0, x0, 0

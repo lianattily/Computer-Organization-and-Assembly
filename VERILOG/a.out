@@ -1,0 +1,146 @@
+#! /c/iverilog/bin/vvp
+:ivl_version "0.9.7 " "(v0_9_7)";
+:vpi_time_precision + 0;
+:vpi_module "system";
+:vpi_module "v2005_math";
+:vpi_module "va_math";
+S_01007100 .scope module, "DFF" "DFF" 2 13;
+ .timescale 0 0;
+L_010421E0 .functor NOT 1, v010420D8_0, C4<0>, C4<0>, C4<0>;
+v01008E58_0 .net "D", 0 0, C4<z>; 0 drivers
+v010420D8_0 .var "Q", 0 0;
+v01042130_0 .net "Qb", 0 0, L_010421E0; 1 drivers
+v01042188_0 .net "clk", 0 0, C4<z>; 0 drivers
+E_0100E6B0 .event posedge, v01042188_0;
+S_01007D38 .scope module, "F_adder" "F_adder" 2 25;
+ .timescale 0 0;
+L_01004570 .functor XOR 1, C4<z>, C4<z>, C4<0>, C4<0>;
+L_010045A8 .functor XOR 1, L_01004570, C4<z>, C4<0>, C4<0>;
+L_01004618 .functor XOR 1, C4<z>, C4<z>, C4<0>, C4<0>;
+L_010036F0 .functor AND 1, C4<z>, L_01004618, C4<1>, C4<1>;
+L_01040E98 .functor AND 1, C4<z>, C4<z>, C4<1>, C4<1>;
+L_01040FB0 .functor OR 1, L_010036F0, L_01040E98, C4<0>, C4<0>;
+v01043090_0 .net "A", 0 0, C4<z>; 0 drivers
+v010430E8_0 .net "B", 0 0, C4<z>; 0 drivers
+v01043140_0 .net "Cin", 0 0, C4<z>; 0 drivers
+v01040B08_0 .net "Cout", 0 0, L_01040FB0; 1 drivers
+v01040848_0 .net "S", 0 0, L_010045A8; 1 drivers
+v010404D8_0 .net *"_s0", 0 0, L_01004570; 1 drivers
+v01040740_0 .net *"_s4", 0 0, L_01004618; 1 drivers
+v01040A58_0 .net *"_s6", 0 0, L_010036F0; 1 drivers
+v010406E8_0 .net *"_s8", 0 0, L_01040E98; 1 drivers
+S_01007298 .scope module, "H_Adder" "H_Adder" 2 1;
+ .timescale 0 0;
+v01040480_0 .net "A", 0 0, C4<z>; 0 drivers
+v010409A8_0 .net "B", 0 0, C4<z>; 0 drivers
+v010407F0_0 .var "Cout", 0 0;
+v01040950_0 .var "S", 0 0;
+E_0100EC50 .event edge, v010409A8_0, v01040480_0;
+S_01007078 .scope module, "testbench" "testbench" 2 45;
+ .timescale 0 0;
+v01040AB0_0 .var "Cin", 0 0;
+v010405E0_0 .net "Cout", 0 0, C4<z>; 0 drivers
+v01040798_0 .net "S", 0 0, C4<z>; 0 drivers
+v01040638_0 .var "a", 0 0;
+v010408A0_0 .var "b", 0 0;
+v01040A00_0 .var "c", 0 0;
+v010408F8_0 .net "d", 0 0, L_01040E28; 1 drivers
+v010693D8_0 .var "expS", 0 0;
+v01068CF8_0 .var/i "i", 31 0;
+v01068F08_0 .var/i "j", 31 0;
+v010690C0_0 .var/i "k", 31 0;
+S_010074B8 .scope module, "x" "xor3" 2 53, 2 36, S_01007078;
+ .timescale 0 0;
+L_01040DB8 .functor XOR 1, v01040638_0, v010408A0_0, C4<0>, C4<0>;
+L_01040E28 .functor XOR 1, L_01040DB8, v01040A00_0, C4<0>, C4<0>;
+v01040530_0 .net "A", 0 0, v01040638_0; 1 drivers
+v01040B60_0 .net "AxB", 0 0, L_01040DB8; 1 drivers
+v01040690_0 .net "B", 0 0, v010408A0_0; 1 drivers
+v01040588_0 .net "C", 0 0, v01040A00_0; 1 drivers
+v01040428_0 .alias "D", 0 0, v010408F8_0;
+    .scope S_01007100;
+T_0 ;
+    %wait E_0100E6B0;
+    %load/v 8, v01008E58_0, 1;
+    %ix/load 0, 1, 0;
+    %assign/v0 v010420D8_0, 0, 8;
+    %jmp T_0;
+    .thread T_0;
+    .scope S_01007298;
+T_1 ;
+    %wait E_0100EC50;
+    %load/v 8, v01040480_0, 1;
+    %load/v 9, v010409A8_0, 1;
+    %xor 8, 9, 1;
+    %cassign/v v01040950_0, 8, 1;
+    %load/v 9, v01040480_0, 1;
+    %load/v 10, v010409A8_0, 1;
+    %and 9, 10, 1;
+    %cassign/v v010407F0_0, 9, 1;
+    %jmp T_1;
+    .thread T_1, $push;
+    .scope S_01007078;
+T_2 ;
+    %vpi_call 2 56 "$display", "-----------------------------------------------------";
+    %set/v v01068CF8_0, 0, 32;
+T_2.0 ;
+    %load/v 10, v01068CF8_0, 32;
+   %cmpi/s 10, 2, 32;
+    %jmp/0xz T_2.1, 5;
+    %set/v v01068F08_0, 0, 32;
+T_2.2 ;
+    %load/v 10, v01068F08_0, 32;
+   %cmpi/s 10, 2, 32;
+    %jmp/0xz T_2.3, 5;
+    %set/v v010690C0_0, 0, 32;
+T_2.4 ;
+    %load/v 10, v010690C0_0, 32;
+   %cmpi/s 10, 2, 32;
+    %jmp/0xz T_2.5, 5;
+    %load/v 10, v01068CF8_0, 32;
+    %set/v v01040638_0, 10, 1;
+    %load/v 10, v01068F08_0, 32;
+    %set/v v010408A0_0, 10, 1;
+    %load/v 10, v010690C0_0, 32;
+    %set/v v01040A00_0, 10, 1;
+    %set/v v01040AB0_0, 0, 1;
+    %delay 1, 0;
+    %load/v 10, v01040638_0, 1;
+    %load/v 11, v010408A0_0, 1;
+    %xor 10, 11, 1;
+    %load/v 11, v01040A00_0, 1;
+    %xor 10, 11, 1;
+    %set/v v010693D8_0, 10, 1;
+    %load/v 10, v010693D8_0, 1;
+    %load/v 11, v010408F8_0, 1;
+    %cmp/u 10, 11, 1;
+    %jmp/0xz  T_2.6, 6;
+    %vpi_call 2 69 "$display", "PASS: A=%b, B=%b, c=%b, d=%b", v01040638_0, v010408A0_0, v01040A00_0, v010408F8_0;
+    %jmp T_2.7;
+T_2.6 ;
+    %vpi_call 2 71 "$display", "FAIL: A=%b, B=%b, S=%b, Cout=%b, expS=%b", v01040638_0, v010408A0_0, v01040798_0, v010405E0_0, v010693D8_0;
+T_2.7 ;
+    %vpi_call 2 76 "$display", "-----------------------------------------------------";
+    %ix/load 0, 1, 0;
+    %load/vp0/s 10, v010690C0_0, 32;
+    %set/v v010690C0_0, 10, 32;
+    %jmp T_2.4;
+T_2.5 ;
+    %ix/load 0, 1, 0;
+    %load/vp0/s 10, v01068F08_0, 32;
+    %set/v v01068F08_0, 10, 32;
+    %jmp T_2.2;
+T_2.3 ;
+    %ix/load 0, 1, 0;
+    %load/vp0/s 10, v01068CF8_0, 32;
+    %set/v v01068CF8_0, 10, 32;
+    %jmp T_2.0;
+T_2.1 ;
+    %vpi_call 2 78 "$finish";
+    %end;
+    .thread T_2;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "practice.v";

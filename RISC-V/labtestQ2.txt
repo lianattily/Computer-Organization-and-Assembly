@@ -1,0 +1,101 @@
+STR:	DC 	"           +3 45\0"
+SPTR:	DD 	STR
+dst:	DM	1
+		;; a0 is s
+		;; t0 = '0' or '+' or '*'
+		;; t1 = '9'
+		;; t2 = *s  
+		;; t3 = c char
+		;; t4 = 10
+		;; s0 = res
+
+;;Make sure you are using lb and sb and the mem a bit occupies is 1
+	addi	sp, x0, 0		;;initialize stack pointer to 0
+      	addi	a0, x0, SPTR
+	;;jal	ra, eatblanks
+	jal	ra, funcalc
+	ecall	x0, a0, 0		;;prints result
+	ebreak	x0, x0, 0
+
+eatblanks:
+	addi	t2, x0, 0		;;initialize t2=0 (offsetter)
+	add	t3, t2, a0
+	ld	t3, 0(a0)
+	lb	t3, 0(t3)		;;c=*s[0]	
+	addi	t4, x0, ' '		;;ascii of space =32
+	bne	t4, t3, end		;;if the c is not a blank, dont enter loop
+while:	addi	a0, t2, 0
+	addi	t3, t2, 0		;;c=*s[0] 	
+	lb	t3, 0(t2)		;;load byte
+	lb	a0, 0(t2)		;;load byte
+	addi	t2, t2, 1		;;*s++ (move one byte down)
+	beq	t4, t3, while		;;c==' ' loop again
+end:	addi	a0, t3, 0		;;a0=c 
+	jalr	x0, 0(ra)		;;return
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+;;ascii of '0'=48 | ascii of '9'=57 (48<=c<=57)
+funcalc: 
+	addi	sp, sp, -16
+	sd	ra, 0(sp)
+	sd	a0, 8(sp)		;;save ptr to *s on stack
+	jal	ra, eatblanks
+	addi	t3, a0, 0		;;c=*s[0] without leading blanks
+	addi	t4, x0, '0'		;;t4='0'
+	addi	t5, x0, '9'		;;t5='9'
+;;	ebreak	x0, x0, 0
+	addi	t2, x0, 0		;;initialize t2=0 (offsetter)
+	blt	t3, t4, if1		;;c<'0'  next if
+	blt	t5, t3, if1		;;c>'9'	next if
+	addi	s0, x0, 0		;;res=0
+
+loop:	addi	t6, x0, 10		;;t6=10
+	mul	s0, s0, t6		;;res=res*10
+	sub	t7, t2, t4		;;t7=c-'0' (converts it to int)
+	add	s0, s0, t7		;;res+=t7
+	addi	t2, t2, 1		;;*s++ (move one byte down)
+	addi	t3, t2, 0		;;c=*s[0] 	
+	bge	t3, t4, loop		;;c>=48
+	bge	t5, t3, loop		;;c<=57
+
+	add	a0, x0, s0		;;a0=res
+	jalr	x0, 0(ra)
+
+;;addition
+if1:	
+	addi	t6, x0, '+'
+	bne	t6, t3, if2
+
+	addi	t2, t2, 1		;;*s++ (move one byte down)
+	lb	a0, 0(t2)		;;c=*s[0] 	
+	;;ebreak	x0, x0, 0		;;a0 should be 51 not 32	
+	jal	ra, funcalc		;;funcalc(s)
+	addi	s0, a0, 0		;;res=funcalc(s)
+	jal	ra, funcalc		;;second recursive call
+	add	s0, s0, a0		;;res = res + funcalc(s)
+	ld	a0, 8(sp)
+	ld	ra, 0(sp)
+	addi	sp, sp, 16
+	addi	a0, s0, 0		;;a0 = return value
+	jalr	x0, 0(ra)
+
+if2:	addi	t6, x0, '*'
+	bne	t6, t3, done
+	addi	t2, t2, 1		;;*s++ (move one byte down)
+	lbu	a0, 1(t2)	
+;;addi	a0, t2, 0		;;c=*s[0] 
+	jal	ra, funcalc		;;funcalc(s)
+	addi	s0, a0, 0		;;res=funcalc(s)
+	jal	ra, funcalc		;;second recursive call
+	mul	s0, s0, a0		;;res = res * funcalc(s)
+	ld	a0, 8(sp)
+	ld	ra, 0(sp)
+	addi	sp, sp, 16
+	addi	a0, s0, 0		;;a0 = return value
+	jalr	x0, 0(ra)
+	
+done:	ld	a0, 8(sp)
+	ld	ra, 0(sp)
+	addi	sp, sp, 16
+	addi	a0, x0, -1		;;return value=-1
+	jalr	x0, 0(ra)
